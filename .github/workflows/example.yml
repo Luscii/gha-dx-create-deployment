@@ -1,0 +1,33 @@
+name: Example Usage
+
+on:
+  workflow_dispatch:
+    inputs:
+      dx_instance:
+        description: 'DX Instance'
+        required: true
+        default: 'luscii'
+      service:
+        description: 'Service Name'
+        required: true
+        default: 'example-service'
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Simulate deployment
+        run: |
+          echo "Deploying application..."
+          echo "Deployment complete!"
+      
+      - name: Create DX Deployment Record
+        uses: ./
+        with:
+          dx_instance: ${{ github.event.inputs.dx_instance }}
+          bearer: ${{ secrets.DX_BEARER_TOKEN }}
+          service: ${{ github.event.inputs.service }}
+          # repository and commit_sha will use defaults
+          # deployed_at will use current timestamp

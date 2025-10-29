@@ -1,0 +1,33 @@
+name: 'DX Create Deployment'
+description: 'Create a deployment record in DX platform'
+author: 'Luscii'
+
+inputs:
+  dx_instance:
+    description: 'DX instance name (e.g., "luscii" for luscii.getdx.net)'
+    required: true
+  bearer:
+    description: 'Bearer token for authentication'
+    required: true
+  service:
+    description: 'Service name for the deployment'
+    required: true
+  repository:
+    description: 'Repository name in format "owner/repo"'
+    required: false
+    default: ${{ github.repository }}
+  commit_sha:
+    description: 'Commit SHA for the deployment'
+    required: false
+    default: ${{ github.sha }}
+  deployed_at:
+    description: 'Deployment timestamp (Unix timestamp). Defaults to current time if not provided'
+    required: false
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'upload-cloud'
+  color: 'blue'
