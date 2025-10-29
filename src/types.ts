@@ -14,20 +14,52 @@ export interface DeploymentConfig {
   commitSha: string;
   /** Deployment timestamp (Unix timestamp) */
   deployedAt: number;
+  /** Unique identifier for the deployment */
+  referenceId?: string;
+  /** External URL with more info about deployment */
+  sourceUrl?: string;
+  /** Source for the deployment (e.g., "argoCD") */
+  sourceName?: string;
+  /** JSON metadata with additional data */
+  metadata?: Record<string, unknown>;
+  /** Integration branch name */
+  integrationBranch?: string;
+  /** Whether the deployment was successful */
+  success?: boolean;
+  /** Environment name */
+  environment?: string;
+  /** Array of merge commit SHAs for attribution */
+  mergeCommitShas?: string[];
 }
 
 /**
  * DX API deployment payload
  */
 export interface DeploymentPayload {
-  /** Repository name in format "owner/repo" */
-  repository: string;
   /** Service name for the deployment */
   service: string;
-  /** Commit SHA for the deployment */
-  commit_sha: string;
   /** Deployment timestamp (Unix timestamp) */
   deployed_at: number;
+  /** Repository name in format "owner/repo" (required for commit_sha mode) */
+  repository?: string;
+  /** Commit SHA for the deployment (required for single commit mode) */
+  commit_sha?: string;
+  /** Array of merge commit SHAs for attribution (alternative to commit_sha + repository) */
+  merge_commit_shas?: string[];
+  /** Unique identifier for the deployment */
+  reference_id?: string;
+  /** External URL with more info about deployment */
+  source_url?: string;
+  /** Source for the deployment (e.g., "argoCD") */
+  source_name?: string;
+  /** JSON metadata with additional data */
+  metadata?: Record<string, unknown>;
+  /** Integration branch name */
+  integration_branch?: string;
+  /** Whether the deployment was successful */
+  success?: boolean;
+  /** Environment name */
+  environment?: string;
 }
 
 /**
@@ -59,6 +91,14 @@ export interface ActionInputs {
   repository?: string;
   commit_sha?: string;
   deployed_at?: string;
+  reference_id?: string;
+  source_url?: string;
+  source_name?: string;
+  metadata?: string;
+  integration_branch?: string;
+  success?: string;
+  environment?: string;
+  merge_commit_shas?: string;
 }
 
 /**

@@ -18,18 +18,49 @@ export class DeploymentService {
   async createDeployment(config: DeploymentConfig): Promise<DxSuccessResponse> {
     // Log deployment information
     core.info(`Creating deployment for service: ${config.service}`);
-    core.info(`Repository: ${config.repository}`);
-    core.info(`Commit SHA: ${config.commitSha}`);
+    
+    if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
+      core.info(`Merge commit SHAs: ${config.mergeCommitShas.join(', ')}`);
+    } else if (config.repository && config.commitSha) {
+      core.info(`Repository: ${config.repository}`);
+      core.info(`Commit SHA: ${config.commitSha}`);
+    }
+    
     core.info(`Deployed at: ${config.deployedAt}`);
+    core.info(`Environment: ${config.environment || 'production (default)'}`);
     core.info(`DX Instance: ${config.dxHost}`);
 
-    // Prepare the payload
+    // Log optional parameters
+    if (config.referenceId) core.info(`Reference ID: ${config.referenceId}`);
+    if (config.sourceUrl) core.info(`Source URL: ${config.sourceUrl}`);
+    if (config.sourceName) core.info(`Source Name: ${config.sourceName}`);
+    if (config.integrationBranch) core.info(`Integration Branch: ${config.integrationBranch}`);
+    if (config.success !== undefined) core.info(`Success: ${config.success}`);
+    if (config.metadata) core.info(`Metadata: ${JSON.stringify(config.metadata)}`);
+
+    // Prepare the payload - only include defined values
     const payload: DeploymentPayload = {
-      repository: config.repository,
       service: config.service,
-      commit_sha: config.commitSha,
       deployed_at: config.deployedAt,
     };
+
+    // Add attribution mode fields
+    if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
+      payload.merge_commit_shas = config.mergeCommitShas;
+    } else if (config.repository && config.commitSha) {
+      // Only add repository and commit_sha if they're not empty (merge commit mode sets them to empty strings)
+      payload.repository = config.repository;
+      payload.commit_sha = config.commitSha;
+    }
+
+    // Add optional fields if provided
+    if (config.referenceId) payload.reference_id = config.referenceId;
+    if (config.sourceUrl) payload.source_url = config.sourceUrl;
+    if (config.sourceName) payload.source_name = config.sourceName;
+    if (config.metadata) payload.metadata = config.metadata;
+    if (config.integrationBranch) payload.integration_branch = config.integrationBranch;
+    if (config.success !== undefined) payload.success = config.success;
+    if (config.environment) payload.environment = config.environment;
 
     // Make the API call
     const response = await this.apiClient.createDeployment(payload);
