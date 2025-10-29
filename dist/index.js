@@ -500,7 +500,6 @@ function emptyToUndefined(input) {
  */
 function validateDeploymentMode(config, useMergeCommitMode) {
     const hasCommitMode = config.repository && config.commitSha;
-    const hasMergeCommitMode = config.mergeCommitShas && config.mergeCommitShas.length > 0;
     if (useMergeCommitMode && hasCommitMode) {
         throw new Error('Cannot use both commit_sha + repository and merge_commit_shas modes simultaneously');
     }
