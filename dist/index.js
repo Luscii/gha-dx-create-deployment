@@ -276,83 +276,6 @@ exports.DeploymentService = DeploymentService;
 
 /***/ }),
 
-/***/ 1188:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = run;
-const core = __importStar(__nccwpck_require__(7484));
-const inputs_1 = __nccwpck_require__(6107);
-const deployment_service_1 = __nccwpck_require__(6603);
-/**
- * Main function to execute the DX deployment creation
- */
-async function run() {
-    try {
-        // Get and validate inputs
-        const inputs = (0, inputs_1.getActionInputs)();
-        const config = (0, inputs_1.createDeploymentConfig)(inputs);
-        // Create deployment service and execute deployment
-        const deploymentService = new deployment_service_1.DeploymentService(config);
-        const response = await deploymentService.createDeployment(config);
-        // Set GitHub Actions outputs
-        deploymentService.setActionOutputs(response);
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        core.setFailed(`Action failed: ${errorMessage}`);
-    }
-}
-// Run the action
-if (require.main === require.cache[eval('__filename')]) {
-    run();
-}
-__exportStar(__nccwpck_require__(2433), exports);
-__exportStar(__nccwpck_require__(6107), exports);
-__exportStar(__nccwpck_require__(1826), exports);
-__exportStar(__nccwpck_require__(6603), exports);
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ 6107:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -557,6 +480,81 @@ function createDeploymentConfig(inputs) {
     return config;
 }
 //# sourceMappingURL=inputs.js.map
+
+/***/ }),
+
+/***/ 5915:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
+const core = __importStar(__nccwpck_require__(7484));
+const inputs_1 = __nccwpck_require__(6107);
+const deployment_service_1 = __nccwpck_require__(6603);
+/**
+ * Main function to execute the DX deployment creation
+ * @returns {Promise<void>} Resolves when the action is complete
+ */
+async function run() {
+    try {
+        // Get and validate inputs
+        const inputs = (0, inputs_1.getActionInputs)();
+        const config = (0, inputs_1.createDeploymentConfig)(inputs);
+        // Create deployment service and execute deployment
+        const deploymentService = new deployment_service_1.DeploymentService(config);
+        const response = await deploymentService.createDeployment(config);
+        // Set GitHub Actions outputs
+        deploymentService.setActionOutputs(response);
+    }
+    catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        core.setFailed(`Action failed: ${errorMessage}`);
+    }
+}
+// Export other utilities that might be needed for testing
+__exportStar(__nccwpck_require__(2433), exports);
+__exportStar(__nccwpck_require__(6107), exports);
+__exportStar(__nccwpck_require__(1826), exports);
+__exportStar(__nccwpck_require__(6603), exports);
+//# sourceMappingURL=main.js.map
 
 /***/ }),
 
@@ -28136,13 +28134,29 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(1188);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+/**
+ * This file is the entrypoint for the action
+ */
+const main_1 = __nccwpck_require__(5915);
+// Call the actual logic of the action when this file is run directly
+if (require.main === require.cache[eval('__filename')]) {
+    (0, main_1.run)();
+}
+// Re-export for testing
+var main_2 = __nccwpck_require__(5915);
+Object.defineProperty(exports, "run", ({ enumerable: true, get: function () { return main_2.run; } }));
+//# sourceMappingURL=index.js.map
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
