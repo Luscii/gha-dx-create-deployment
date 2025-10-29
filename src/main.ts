@@ -14,7 +14,7 @@ export async function run(): Promise<void> {
 
     // Create deployment service and execute deployment
     const deploymentService = new DeploymentService(config);
-    const response = await deploymentService.createDeployment(config);
+    const response = await deploymentService.createDeployment();
 
     // Set GitHub Actions outputs
     deploymentService.setActionOutputs(response);
