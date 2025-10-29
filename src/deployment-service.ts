@@ -19,13 +19,11 @@ export class DeploymentService {
     // Log deployment information
     core.info(`Creating deployment for service: ${config.service}`);
     
-    if (config.repository && config.commitSha) {
-      core.info(`Repository: ${config.repository}`);
-      core.info(`Commit SHA: ${config.commitSha}`);
-    }
-    
     if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
       core.info(`Merge commit SHAs: ${config.mergeCommitShas.join(', ')}`);
+    } else if (config.repository && config.commitSha) {
+      core.info(`Repository: ${config.repository}`);
+      core.info(`Commit SHA: ${config.commitSha}`);
     }
     
     core.info(`Deployed at: ${config.deployedAt}`);
@@ -50,6 +48,7 @@ export class DeploymentService {
     if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
       payload.merge_commit_shas = config.mergeCommitShas;
     } else if (config.repository && config.commitSha) {
+      // Only add repository and commit_sha if they're not empty (merge commit mode sets them to empty strings)
       payload.repository = config.repository;
       payload.commit_sha = config.commitSha;
     }

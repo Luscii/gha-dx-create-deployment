@@ -144,8 +144,8 @@ describe('Input processing', () => {
       const config = createDeploymentConfig(inputs);
 
       expect(config.mergeCommitShas).toEqual(['abc123', 'def456']);
-      expect(config.repository).toBeUndefined();
-      expect(config.commitSha).toBeUndefined();
+      expect(config.repository).toBe('');
+      expect(config.commitSha).toBe('');
     });
 
     it('should parse optional parameters correctly', () => {
@@ -235,14 +235,13 @@ describe('Input processing', () => {
       expect(() => createDeploymentConfig(inputs)).toThrow('Boolean input must be "true" or "false"');
     });
 
-    it('should throw error when both commit mode and merge commit mode are provided', () => {
-      process.env.GITHUB_REPOSITORY = 'test/repo';
-      process.env.GITHUB_SHA = 'def456';
-
+    it('should throw error when both commit mode and merge commit mode are provided explicitly', () => {
       const inputs: ActionInputs = {
         dx_instance: 'luscii',
         bearer: 'test-token',
         service: 'test-service',
+        repository: 'test/repo',
+        commit_sha: 'def456', 
         merge_commit_shas: '["abc123"]'
       };
 
@@ -256,7 +255,7 @@ describe('Input processing', () => {
         service: 'test-service'
       };
 
-      expect(() => createDeploymentConfig(inputs)).toThrow('Must provide either (commit_sha + repository) or merge_commit_shas for deployment attribution');
+      expect(() => createDeploymentConfig(inputs)).toThrow('repository must be provided via input or GITHUB_REPOSITORY environment variable');
     });
 
     it('should construct DX host URL from instance name', () => {

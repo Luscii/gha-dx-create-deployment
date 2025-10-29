@@ -206,12 +206,12 @@ class DeploymentService {
     async createDeployment(config) {
         // Log deployment information
         core.info(`Creating deployment for service: ${config.service}`);
-        if (config.repository && config.commitSha) {
-            core.info(`Repository: ${config.repository}`);
-            core.info(`Commit SHA: ${config.commitSha}`);
-        }
         if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
             core.info(`Merge commit SHAs: ${config.mergeCommitShas.join(', ')}`);
+        }
+        else if (config.repository && config.commitSha) {
+            core.info(`Repository: ${config.repository}`);
+            core.info(`Commit SHA: ${config.commitSha}`);
         }
         core.info(`Deployed at: ${config.deployedAt}`);
         core.info(`Environment: ${config.environment || 'production (default)'}`);
@@ -239,6 +239,7 @@ class DeploymentService {
             payload.merge_commit_shas = config.mergeCommitShas;
         }
         else if (config.repository && config.commitSha) {
+            // Only add repository and commit_sha if they're not empty (merge commit mode sets them to empty strings)
             payload.repository = config.repository;
             payload.commit_sha = config.commitSha;
         }
@@ -489,17 +490,25 @@ function parseBooleanInput(input) {
     throw new Error(`Boolean input must be "true" or "false", got: ${input}`);
 }
 /**
+ * Convert empty string input to undefined
+ */
+function emptyToUndefined(input) {
+    return input && input.trim() !== '' ? input : undefined;
+}
+/**
  * Validate deployment configuration mode
  */
-function validateDeploymentMode(config) {
+function validateDeploymentMode(config, useMergeCommitMode) {
     const hasCommitMode = config.repository && config.commitSha;
     const hasMergeCommitMode = config.mergeCommitShas && config.mergeCommitShas.length > 0;
-    if (hasCommitMode && hasMergeCommitMode) {
+    if (useMergeCommitMode && hasCommitMode) {
         throw new Error('Cannot use both commit_sha + repository and merge_commit_shas modes simultaneously');
     }
-    if (!hasCommitMode && !hasMergeCommitMode) {
+    if (!useMergeCommitMode && !hasCommitMode) {
         throw new Error('Must provide either (commit_sha + repository) or merge_commit_shas for deployment attribution');
     }
+    // Integration branch mode is valid when used with commit mode
+    // It's an enhancement to the single commit attribution mode
 }
 /**
  * Process inputs and create deployment configuration
@@ -517,24 +526,35 @@ function createDeploymentConfig(inputs) {
     const metadata = parseJsonInput(inputs.metadata, 'metadata');
     const mergeCommitShas = parseJsonArrayInput(inputs.merge_commit_shas, 'merge_commit_shas');
     const success = parseBooleanInput(inputs.success);
+    // Check if using merge commit mode
+    const useMergeCommitMode = !!(mergeCommitShas && mergeCommitShas.length > 0);
+    if (!useMergeCommitMode) {
+        // For single commit mode, ensure repository and commitSha are provided
+        if (!repository) {
+            throw new Error('repository must be provided via input or GITHUB_REPOSITORY environment variable');
+        }
+        if (!commitSha) {
+            throw new Error('commit_sha must be provided via input or GITHUB_SHA environment variable');
+        }
+    }
     const config = {
         dxHost,
         bearer: inputs.bearer,
         service: inputs.service,
         deployedAt,
-        repository,
-        commitSha,
-        referenceId: inputs.reference_id || undefined,
-        sourceUrl: inputs.source_url || undefined,
-        sourceName: inputs.source_name || undefined,
+        repository: repository || '', // Empty string for merge commit mode
+        commitSha: commitSha || '', // Empty string for merge commit mode
+        referenceId: emptyToUndefined(inputs.reference_id),
+        sourceUrl: emptyToUndefined(inputs.source_url),
+        sourceName: emptyToUndefined(inputs.source_name),
         metadata,
-        integrationBranch: inputs.integration_branch || undefined,
+        integrationBranch: emptyToUndefined(inputs.integration_branch),
         success,
-        environment: inputs.environment || undefined,
+        environment: emptyToUndefined(inputs.environment),
         mergeCommitShas,
     };
     // Validate deployment mode
-    validateDeploymentMode(config);
+    validateDeploymentMode(config, useMergeCommitMode);
     return config;
 }
 //# sourceMappingURL=inputs.js.map

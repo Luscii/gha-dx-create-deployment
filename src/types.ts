@@ -9,9 +9,9 @@ export interface DeploymentConfig {
   /** Service name for the deployment */
   service: string;
   /** Repository name in format "owner/repo" */
-  repository?: string;
+  repository: string;
   /** Commit SHA for the deployment */
-  commitSha?: string;
+  commitSha: string;
   /** Deployment timestamp (Unix timestamp) */
   deployedAt: number;
   /** Unique identifier for the deployment */

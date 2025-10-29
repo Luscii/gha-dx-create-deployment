@@ -102,19 +102,29 @@ function parseBooleanInput(input: string | undefined): boolean | undefined {
 }
 
 /**
+ * Convert empty string input to undefined
+ */
+function emptyToUndefined(input: string | undefined): string | undefined {
+  return input && input.trim() !== '' ? input : undefined;
+}
+
+/**
  * Validate deployment configuration mode
  */
-function validateDeploymentMode(config: DeploymentConfig): void {
+function validateDeploymentMode(config: DeploymentConfig, useMergeCommitMode: boolean): void {
   const hasCommitMode = config.repository && config.commitSha;
   const hasMergeCommitMode = config.mergeCommitShas && config.mergeCommitShas.length > 0;
   
-  if (hasCommitMode && hasMergeCommitMode) {
+  if (useMergeCommitMode && hasCommitMode) {
     throw new Error('Cannot use both commit_sha + repository and merge_commit_shas modes simultaneously');
   }
   
-  if (!hasCommitMode && !hasMergeCommitMode) {
+  if (!useMergeCommitMode && !hasCommitMode) {
     throw new Error('Must provide either (commit_sha + repository) or merge_commit_shas for deployment attribution');
   }
+
+  // Integration branch mode is valid when used with commit mode
+  // It's an enhancement to the single commit attribution mode
 }
 
 /**
@@ -138,25 +148,38 @@ export function createDeploymentConfig(inputs: ActionInputs): DeploymentConfig {
   const mergeCommitShas = parseJsonArrayInput(inputs.merge_commit_shas, 'merge_commit_shas');
   const success = parseBooleanInput(inputs.success);
 
+  // Check if using merge commit mode
+  const useMergeCommitMode = !!(mergeCommitShas && mergeCommitShas.length > 0);
+  
+  if (!useMergeCommitMode) {
+    // For single commit mode, ensure repository and commitSha are provided
+    if (!repository) {
+      throw new Error('repository must be provided via input or GITHUB_REPOSITORY environment variable');
+    }
+    if (!commitSha) {
+      throw new Error('commit_sha must be provided via input or GITHUB_SHA environment variable');
+    }
+  }
+
   const config: DeploymentConfig = {
     dxHost,
     bearer: inputs.bearer,
     service: inputs.service,
     deployedAt,
-    repository,
-    commitSha,
-    referenceId: inputs.reference_id || undefined,
-    sourceUrl: inputs.source_url || undefined,
-    sourceName: inputs.source_name || undefined,
+    repository: repository || '',  // Empty string for merge commit mode
+    commitSha: commitSha || '',    // Empty string for merge commit mode
+    referenceId: emptyToUndefined(inputs.reference_id),
+    sourceUrl: emptyToUndefined(inputs.source_url),
+    sourceName: emptyToUndefined(inputs.source_name),
     metadata,
-    integrationBranch: inputs.integration_branch || undefined,
+    integrationBranch: emptyToUndefined(inputs.integration_branch),
     success,
-    environment: inputs.environment || undefined,
+    environment: emptyToUndefined(inputs.environment),
     mergeCommitShas,
   };
 
   // Validate deployment mode
-  validateDeploymentMode(config);
+  validateDeploymentMode(config, useMergeCommitMode);
 
   return config;
 }
