@@ -86,6 +86,10 @@ describe('Local Action Test', () => {
     delete process.env.INPUT_SUCCESS;
     delete process.env.INPUT_METADATA;
 
+    // Set GitHub environment variables that would normally be provided by GitHub Actions
+    process.env.GITHUB_REPOSITORY = 'test-org/test-repo';
+    process.env.GITHUB_SHA = 'abc123def456';
+
     await run();
     expect(DxApiClient).toHaveBeenCalled();
     expect(mockCreateDeployment).toHaveBeenCalled();
