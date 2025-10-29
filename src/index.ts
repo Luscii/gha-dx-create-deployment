@@ -1,36 +1,12 @@
-import * as core from '@actions/core';
-import { getActionInputs, createDeploymentConfig } from './inputs';
-import { DeploymentService } from './deployment-service';
-
 /**
- * Main function to execute the DX deployment creation
+ * This file is the entrypoint for the action
  */
-async function run(): Promise<void> {
-  try {
-    // Get and validate inputs
-    const inputs = getActionInputs();
-    const config = createDeploymentConfig(inputs);
+import { run } from './main';
 
-    // Create deployment service and execute deployment
-    const deploymentService = new DeploymentService(config);
-    const response = await deploymentService.createDeployment(config);
-
-    // Set GitHub Actions outputs
-    deploymentService.setActionOutputs(response);
-
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    core.setFailed(`Action failed: ${errorMessage}`);
-  }
-}
-
-// Run the action
+// Call the actual logic of the action when this file is run directly
 if (require.main === module) {
   run();
 }
 
-export { run };
-export * from './types';
-export * from './inputs';
-export * from './api-client';
-export * from './deployment-service';
+// Re-export for testing
+export { run } from './main';
