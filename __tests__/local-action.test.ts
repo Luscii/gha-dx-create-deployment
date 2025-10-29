@@ -2,7 +2,7 @@ import { run } from '../src/main';
 import { DxApiClient } from '../src/api-client';
 import * as core from '@actions/core';
 import * as dotenv from 'dotenv';
-import * as path from 'node:path';
+import * as path from 'path';
 
 // Mock @actions/core
 jest.mock('@actions/core');
