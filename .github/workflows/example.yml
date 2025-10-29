@@ -3,10 +3,10 @@ name: Example Usage
 on:
   workflow_dispatch:
     inputs:
-      dx_host:
-        description: 'DX Host'
+      dx_instance:
+        description: 'DX Instance'
         required: true
-        default: 'yourinstance.getdx.net'
+        default: 'luscii'
       service:
         description: 'Service Name'
         required: true
@@ -26,7 +26,7 @@ jobs:
       - name: Create DX Deployment Record
         uses: ./
         with:
-          dx_host: ${{ github.event.inputs.dx_host }}
+          dx_instance: ${{ github.event.inputs.dx_instance }}
           bearer: ${{ secrets.DX_BEARER_TOKEN }}
           service: ${{ github.event.inputs.service }}
           # repository and commit_sha will use defaults

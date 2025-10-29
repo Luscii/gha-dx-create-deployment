@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { DeploymentService } from '../src/deployment-service';
-import { DeploymentConfig, DeploymentResponse } from '../src/types';
+import { DeploymentConfig, DxSuccessResponse } from '../src/types';
 
 // Mock the core module
 jest.mock('@actions/core');
@@ -19,7 +19,7 @@ describe('DeploymentService', () => {
   });
 
   const mockConfig: DeploymentConfig = {
-    dxHost: 'https://test.getdx.net',
+    dxHost: 'https://luscii.getdx.net',
     bearer: 'test-token',
     service: 'test-service',
     repository: 'test/repo',
@@ -30,7 +30,8 @@ describe('DeploymentService', () => {
   describe('setActionOutputs', () => {
     it('should set correct outputs from response', () => {
       const service = new DeploymentService(mockConfig);
-      const response: DeploymentResponse = {
+      const response: DxSuccessResponse = {
+        ok: true,
         id: 'deployment-123',
         status: 'success'
       };
@@ -43,7 +44,8 @@ describe('DeploymentService', () => {
 
     it('should set deployment_id as unknown when not available in response', () => {
       const service = new DeploymentService(mockConfig);
-      const response: DeploymentResponse = {
+      const response: DxSuccessResponse = {
+        ok: true,
         status: 'success'
       };
 

@@ -6,7 +6,7 @@ import { ActionInputs, DeploymentConfig } from './types';
  */
 export function getActionInputs(): ActionInputs {
   return {
-    dx_host: core.getInput('dx_host', { required: true }),
+    dx_instance: core.getInput('dx_instance', { required: true }),
     bearer: core.getInput('bearer', { required: true }),
     service: core.getInput('service', { required: true }),
     repository: core.getInput('repository'),
@@ -19,8 +19,8 @@ export function getActionInputs(): ActionInputs {
  * Validate required inputs and throw an error if any are missing
  */
 export function validateRequiredInputs(inputs: ActionInputs): void {
-  if (!inputs.dx_host) {
-    throw new Error('dx_host input is required');
+  if (!inputs.dx_instance) {
+    throw new Error('dx_instance input is required');
   }
   if (!inputs.bearer) {
     throw new Error('bearer input is required');
@@ -51,10 +51,8 @@ export function createDeploymentConfig(inputs: ActionInputs): DeploymentConfig {
     ? parseInt(inputs.deployed_at, 10) 
     : Math.floor(Date.now() / 1000);
 
-  // Ensure dx_host has the correct format
-  const dxHost = inputs.dx_host.startsWith('http') 
-    ? inputs.dx_host 
-    : `https://${inputs.dx_host}`;
+  // Construct DX host URL from instance name
+  const dxHost = `https://${inputs.dx_instance}.getdx.net`;
 
   return {
     dxHost,

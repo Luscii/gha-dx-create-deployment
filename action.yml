@@ -3,8 +3,8 @@ description: 'Create a deployment record in DX platform'
 author: 'Luscii'
 
 inputs:
-  dx_host:
-    description: 'DX instance host (e.g., yourinstance.getdx.net)'
+  dx_instance:
+    description: 'DX instance name (e.g., "luscii" for luscii.getdx.net)'
     required: true
   bearer:
     description: 'Bearer token for authentication'

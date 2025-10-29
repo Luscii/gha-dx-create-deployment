@@ -17,7 +17,7 @@ describe('Input processing', () => {
     it('should get all inputs from core', () => {
       mockedCore.getInput.mockImplementation((name: string) => {
         const inputs: Record<string, string> = {
-          'dx_host': 'test.getdx.net',
+          'dx_instance': 'luscii',
           'bearer': 'test-token',
           'service': 'test-service',
           'repository': 'test/repo',
@@ -29,7 +29,7 @@ describe('Input processing', () => {
 
       const inputs = getActionInputs();
 
-      expect(inputs.dx_host).toBe('test.getdx.net');
+      expect(inputs.dx_instance).toBe('luscii');
       expect(inputs.bearer).toBe('test-token');
       expect(inputs.service).toBe('test-service');
       expect(inputs.repository).toBe('test/repo');
@@ -39,19 +39,19 @@ describe('Input processing', () => {
   });
 
   describe('validateRequiredInputs', () => {
-    it('should throw error for missing dx_host', () => {
+    it('should throw error for missing dx_instance', () => {
       const inputs: ActionInputs = {
-        dx_host: '',
+        dx_instance: '',
         bearer: 'test-token',
         service: 'test-service'
       };
 
-      expect(() => validateRequiredInputs(inputs)).toThrow('dx_host input is required');
+      expect(() => validateRequiredInputs(inputs)).toThrow('dx_instance input is required');
     });
 
     it('should throw error for missing bearer', () => {
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: '',
         service: 'test-service'
       };
@@ -61,7 +61,7 @@ describe('Input processing', () => {
 
     it('should throw error for missing service', () => {
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: 'test-token',
         service: ''
       };
@@ -71,7 +71,7 @@ describe('Input processing', () => {
 
     it('should pass validation with all required inputs', () => {
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: 'test-token',
         service: 'test-service'
       };
@@ -86,14 +86,14 @@ describe('Input processing', () => {
       process.env.GITHUB_SHA = 'def456';
 
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: 'test-token',
         service: 'test-service'
       };
 
       const config = createDeploymentConfig(inputs);
 
-      expect(config.dxHost).toBe('https://test.getdx.net');
+      expect(config.dxHost).toBe('https://luscii.getdx.net');
       expect(config.bearer).toBe('test-token');
       expect(config.service).toBe('test-service');
       expect(config.repository).toBe('test/repo');
@@ -106,7 +106,7 @@ describe('Input processing', () => {
       process.env.GITHUB_SHA = 'def456';
 
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: 'test-token',
         service: 'test-service',
         deployed_at: '1700000000'
@@ -117,34 +117,34 @@ describe('Input processing', () => {
       expect(config.deployedAt).toBe(1700000000);
     });
 
-    it('should add https:// prefix to dx_host if missing', () => {
+    it('should construct DX host URL from instance name', () => {
       process.env.GITHUB_REPOSITORY = 'test/repo';
       process.env.GITHUB_SHA = 'def456';
 
       const inputs: ActionInputs = {
-        dx_host: 'test.getdx.net',
+        dx_instance: 'luscii',
         bearer: 'test-token',
         service: 'test-service'
       };
 
       const config = createDeploymentConfig(inputs);
 
-      expect(config.dxHost).toBe('https://test.getdx.net');
+      expect(config.dxHost).toBe('https://luscii.getdx.net');
     });
 
-    it('should not modify dx_host if it already has protocol', () => {
+    it('should work with different instance names', () => {
       process.env.GITHUB_REPOSITORY = 'test/repo';
       process.env.GITHUB_SHA = 'def456';
 
       const inputs: ActionInputs = {
-        dx_host: 'https://test.getdx.net',
+        dx_instance: 'mycompany',
         bearer: 'test-token',
         service: 'test-service'
       };
 
       const config = createDeploymentConfig(inputs);
 
-      expect(config.dxHost).toBe('https://test.getdx.net');
+      expect(config.dxHost).toBe('https://mycompany.getdx.net');
     });
   });
 });

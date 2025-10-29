@@ -43,6 +43,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DxApiClient = void 0;
 const https = __importStar(__nccwpck_require__(5692));
 const url_1 = __nccwpck_require__(7016);
+const types_1 = __nccwpck_require__(2433);
 /**
  * DX API client for creating deployments
  */
@@ -85,11 +86,28 @@ class DxApiClient {
                 res.on('end', () => {
                     try {
                         const response = JSON.parse(data);
-                        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                            resolve(response);
+                        // Always check the 'ok' parameter as required by the documentation
+                        if ('ok' in response) {
+                            if (response.ok === true) {
+                                // Successful response
+                                resolve(response);
+                            }
+                            else {
+                                // Error response with ok: false
+                                const errorResponse = response;
+                                reject(new types_1.DxApiError(errorResponse.error, res.statusCode || 0, this.getErrorMessage(errorResponse.error)));
+                            }
                         }
                         else {
-                            reject(new Error(`API request failed with status ${res.statusCode || 'unknown'}: ${data}`));
+                            // Response doesn't have 'ok' field - this is unexpected
+                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                                // 2xx status without 'ok' field - treat as success but add the field
+                                resolve({ ok: true, ...response });
+                            }
+                            else {
+                                // Non-2xx status without 'ok' field - treat as error
+                                reject(new Error(`API request failed with status ${res.statusCode}: ${data}`));
+                            }
                         }
                     }
                     catch (parseError) {
@@ -104,6 +122,28 @@ class DxApiClient {
             req.write(postData);
             req.end();
         });
+    }
+    /**
+     * Get human-readable error message for DX error codes
+     * Handles both known and unknown error codes as per documentation
+     */
+    getErrorMessage(errorCode) {
+        switch (errorCode) {
+            case 'not_authed':
+                return 'This error occurs if the API request does not include a valid API key for authentication.';
+            case 'invalid_auth':
+                return 'The provided API key is invalid. This can happen if the key is expired or does not exist.';
+            case 'account_inactive':
+                return 'The user account associated with the API key is deactivated or suspended.';
+            case 'invalid_json':
+                return 'The JSON body of the request could not be parsed. This usually indicates a syntax error.';
+            case 'required_params_missing':
+                return 'One or more required parameters were not provided in the request.';
+            case 'repo_not_found':
+                return 'The specified repository could not be found. This could be due to a typo or an incorrect repository name.';
+            default:
+                return `Unexpected DX API error: ${errorCode}. This may indicate service issues or other unexpected factors affecting processing.`;
+        }
     }
 }
 exports.DxApiClient = DxApiClient;
@@ -169,6 +209,7 @@ class DeploymentService {
         core.info(`Repository: ${config.repository}`);
         core.info(`Commit SHA: ${config.commitSha}`);
         core.info(`Deployed at: ${config.deployedAt}`);
+        core.info(`DX Instance: ${config.dxHost}`);
         // Prepare the payload
         const payload = {
             repository: config.repository,
@@ -319,7 +360,7 @@ const core = __importStar(__nccwpck_require__(7484));
  */
 function getActionInputs() {
     return {
-        dx_host: core.getInput('dx_host', { required: true }),
+        dx_instance: core.getInput('dx_instance', { required: true }),
         bearer: core.getInput('bearer', { required: true }),
         service: core.getInput('service', { required: true }),
         repository: core.getInput('repository'),
@@ -331,8 +372,8 @@ function getActionInputs() {
  * Validate required inputs and throw an error if any are missing
  */
 function validateRequiredInputs(inputs) {
-    if (!inputs.dx_host) {
-        throw new Error('dx_host input is required');
+    if (!inputs.dx_instance) {
+        throw new Error('dx_instance input is required');
     }
     if (!inputs.bearer) {
         throw new Error('bearer input is required');
@@ -357,10 +398,8 @@ function createDeploymentConfig(inputs) {
     const deployedAt = inputs.deployed_at
         ? parseInt(inputs.deployed_at, 10)
         : Math.floor(Date.now() / 1000);
-    // Ensure dx_host has the correct format
-    const dxHost = inputs.dx_host.startsWith('http')
-        ? inputs.dx_host
-        : `https://${inputs.dx_host}`;
+    // Construct DX host URL from instance name
+    const dxHost = `https://${inputs.dx_instance}.getdx.net`;
     return {
         dxHost,
         bearer: inputs.bearer,
@@ -380,6 +419,19 @@ function createDeploymentConfig(inputs) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DxApiError = void 0;
+/**
+ * Custom error class for DX API errors
+ */
+class DxApiError extends Error {
+    constructor(errorCode, statusCode, message) {
+        super(message || `DX API error: ${errorCode}`);
+        this.errorCode = errorCode;
+        this.statusCode = statusCode;
+        this.name = 'DxApiError';
+    }
+}
+exports.DxApiError = DxApiError;
 //# sourceMappingURL=types.js.map
 
 /***/ }),

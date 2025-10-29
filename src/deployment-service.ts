@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { DxApiClient } from './api-client';
-import { DeploymentConfig, DeploymentPayload, DeploymentResponse } from './types';
+import { DeploymentConfig, DeploymentPayload, DxSuccessResponse } from './types';
 
 /**
  * Service for creating deployments in DX platform
@@ -15,12 +15,13 @@ export class DeploymentService {
   /**
    * Create a deployment with the given configuration
    */
-  async createDeployment(config: DeploymentConfig): Promise<DeploymentResponse> {
+  async createDeployment(config: DeploymentConfig): Promise<DxSuccessResponse> {
     // Log deployment information
     core.info(`Creating deployment for service: ${config.service}`);
     core.info(`Repository: ${config.repository}`);
     core.info(`Commit SHA: ${config.commitSha}`);
     core.info(`Deployed at: ${config.deployedAt}`);
+    core.info(`DX Instance: ${config.dxHost}`);
 
     // Prepare the payload
     const payload: DeploymentPayload = {
@@ -40,8 +41,8 @@ export class DeploymentService {
   /**
    * Set GitHub Actions outputs based on the API response
    */
-  setActionOutputs(response: DeploymentResponse): void {
+  setActionOutputs(response: DxSuccessResponse): void {
     core.setOutput('response', JSON.stringify(response));
-    core.setOutput('deployment_id', response.id || 'unknown');
+    core.setOutput('deployment_id', (response as Record<string, unknown>).id as string || 'unknown');
   }
 }
