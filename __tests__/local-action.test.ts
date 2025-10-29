@@ -24,6 +24,16 @@ describe('Local Action Test', () => {
     // Reset all mocks
     jest.resetAllMocks();
 
+    // Setup @actions/core mock
+    (core.getInput as jest.Mock).mockImplementation((name: string, options?: { required?: boolean }) => {
+      const envVarName = `INPUT_${name.toUpperCase()}`;
+      const value = process.env[envVarName];
+      if (options?.required && !value) {
+        throw new Error(`Input required and not supplied: ${name}`);
+      }
+      return value || '';
+    });
+
     // Setup DxApiClient mock
     mockCreateDeployment = jest.fn();
     (DxApiClient as jest.Mock).mockImplementation(() => ({

@@ -76,6 +76,12 @@ export class DeploymentService {
    */
   setActionOutputs(response: DxSuccessResponse): void {
     core.setOutput('response', JSON.stringify(response));
-    core.setOutput('deployment_id', (response as Record<string, unknown>).id as string || 'unknown');
+    
+    // Extract deployment ID from response data
+    const responseData = (response as Record<string, unknown>);
+    const data = responseData.data as Record<string, unknown> | undefined;
+    const deploymentId = data?.id as string || responseData.id as string || 'unknown';
+    
+    core.setOutput('deployment_id', deploymentId);
   }
 }
