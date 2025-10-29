@@ -1,7 +1,6 @@
 {
   "name": "gha-dx-create-deployment",
   "version": "1.0.0",
-
   "description": "GitHub Action to create deployments in DX platform",
   "main": "dist/index.js",
   "scripts": {
@@ -10,7 +9,8 @@
     "test": "jest",
     "lint": "npx eslint --config eslint.config.mjs src/**/*.ts",
     "type-check": "tsc --noEmit",
-    "lint:fix": "npx eslint --fix src/**/*.ts"
+    "lint:fix": "npx eslint --fix src/**/*.ts",
+    "action:local": "LOCAL_ACTION=true jest -c jest.config.mjs __tests__/local-action.test.ts --testEnvironment=node --runInBand"
   },
   "repository": {
     "type": "git",
@@ -31,11 +31,13 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.38.0",
     "@eslint/object-schema": "^2.1.7",
+    "@github/local-action": "^6.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vercel/ncc": "^0.38.4",
+    "dotenv": "^17.2.3",
     "eslint": "^9.38.0",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.5",
