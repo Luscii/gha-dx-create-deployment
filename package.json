@@ -10,7 +10,7 @@
     "lint": "npx eslint --config eslint.config.mjs src/**/*.ts",
     "type-check": "tsc --noEmit",
     "lint:fix": "npx eslint --fix src/**/*.ts",
-    "action:local": "LOCAL_ACTION=true jest -c jest.config.mjs __tests__/local-action.test.ts --testEnvironment=node --runInBand"
+    "action:local": "cross-env LOCAL_ACTION=true jest -c jest.config.mjs __tests__/local-action.test.ts --testEnvironment=node --runInBand"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vercel/ncc": "^0.38.4",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "eslint": "^9.38.0",
     "jest": "^30.2.0",
