@@ -24,6 +24,16 @@ describe('Local Action Test', () => {
     // Reset all mocks
     jest.resetAllMocks();
 
+    // Setup @actions/core mock
+    (core.getInput as jest.Mock).mockImplementation((name: string, options?: { required?: boolean }) => {
+      const envVarName = `INPUT_${name.toUpperCase()}`;
+      const value = process.env[envVarName];
+      if (options?.required && !value) {
+        throw new Error(`Input required and not supplied: ${name}`);
+      }
+      return value || '';
+    });
+
     // Setup DxApiClient mock
     mockCreateDeployment = jest.fn();
     (DxApiClient as jest.Mock).mockImplementation(() => ({
@@ -75,6 +85,10 @@ describe('Local Action Test', () => {
     delete process.env.INPUT_ENVIRONMENT;
     delete process.env.INPUT_SUCCESS;
     delete process.env.INPUT_METADATA;
+
+    // Set GitHub environment variables that would normally be provided by GitHub Actions
+    process.env.GITHUB_REPOSITORY = 'test-org/test-repo';
+    process.env.GITHUB_SHA = 'abc123def456';
 
     await run();
     expect(DxApiClient).toHaveBeenCalled();
