@@ -1,6 +1,389 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 1826:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DxApiClient = void 0;
+const https = __importStar(__nccwpck_require__(5692));
+const url_1 = __nccwpck_require__(7016);
+/**
+ * DX API client for creating deployments
+ */
+class DxApiClient {
+    constructor(baseUrl, bearerToken) {
+        this.baseUrl = baseUrl;
+        this.bearerToken = bearerToken;
+    }
+    /**
+     * Create a deployment in DX platform
+     */
+    async createDeployment(payload) {
+        const url = `${this.baseUrl}/api/deployments.create`;
+        return this.makeApiCall(url, payload);
+    }
+    /**
+     * Make HTTPS API call to DX platform
+     */
+    makeApiCall(url, payload) {
+        return new Promise((resolve, reject) => {
+            const parsedUrl = new url_1.URL(url);
+            const postData = JSON.stringify(payload);
+            const options = {
+                hostname: parsedUrl.hostname,
+                port: parsedUrl.port || 443,
+                path: parsedUrl.pathname,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.bearerToken}`,
+                    'Content-Length': Buffer.byteLength(postData),
+                    'User-Agent': 'gha-dx-create-deployment/1.0.0',
+                },
+            };
+            const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk.toString();
+                });
+                res.on('end', () => {
+                    try {
+                        const response = JSON.parse(data);
+                        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                            resolve(response);
+                        }
+                        else {
+                            reject(new Error(`API request failed with status ${res.statusCode || 'unknown'}: ${data}`));
+                        }
+                    }
+                    catch (parseError) {
+                        reject(new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}. Response: ${data}`));
+                    }
+                });
+            });
+            req.on('error', (error) => {
+                reject(new Error(`Request failed: ${error.message}`));
+            });
+            // Write the payload
+            req.write(postData);
+            req.end();
+        });
+    }
+}
+exports.DxApiClient = DxApiClient;
+//# sourceMappingURL=api-client.js.map
+
+/***/ }),
+
+/***/ 6603:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeploymentService = void 0;
+const core = __importStar(__nccwpck_require__(7484));
+const api_client_1 = __nccwpck_require__(1826);
+/**
+ * Service for creating deployments in DX platform
+ */
+class DeploymentService {
+    constructor(config) {
+        this.apiClient = new api_client_1.DxApiClient(config.dxHost, config.bearer);
+    }
+    /**
+     * Create a deployment with the given configuration
+     */
+    async createDeployment(config) {
+        // Log deployment information
+        core.info(`Creating deployment for service: ${config.service}`);
+        core.info(`Repository: ${config.repository}`);
+        core.info(`Commit SHA: ${config.commitSha}`);
+        core.info(`Deployed at: ${config.deployedAt}`);
+        // Prepare the payload
+        const payload = {
+            repository: config.repository,
+            service: config.service,
+            commit_sha: config.commitSha,
+            deployed_at: config.deployedAt,
+        };
+        // Make the API call
+        const response = await this.apiClient.createDeployment(payload);
+        core.info('Deployment created successfully');
+        return response;
+    }
+    /**
+     * Set GitHub Actions outputs based on the API response
+     */
+    setActionOutputs(response) {
+        core.setOutput('response', JSON.stringify(response));
+        core.setOutput('deployment_id', response.id || 'unknown');
+    }
+}
+exports.DeploymentService = DeploymentService;
+//# sourceMappingURL=deployment-service.js.map
+
+/***/ }),
+
+/***/ 1188:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
+const core = __importStar(__nccwpck_require__(7484));
+const inputs_1 = __nccwpck_require__(6107);
+const deployment_service_1 = __nccwpck_require__(6603);
+/**
+ * Main function to execute the DX deployment creation
+ */
+async function run() {
+    try {
+        // Get and validate inputs
+        const inputs = (0, inputs_1.getActionInputs)();
+        const config = (0, inputs_1.createDeploymentConfig)(inputs);
+        // Create deployment service and execute deployment
+        const deploymentService = new deployment_service_1.DeploymentService(config);
+        const response = await deploymentService.createDeployment(config);
+        // Set GitHub Actions outputs
+        deploymentService.setActionOutputs(response);
+    }
+    catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        core.setFailed(`Action failed: ${errorMessage}`);
+    }
+}
+// Run the action
+if (require.main === require.cache[eval('__filename')]) {
+    run();
+}
+__exportStar(__nccwpck_require__(2433), exports);
+__exportStar(__nccwpck_require__(6107), exports);
+__exportStar(__nccwpck_require__(1826), exports);
+__exportStar(__nccwpck_require__(6603), exports);
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 6107:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getActionInputs = getActionInputs;
+exports.validateRequiredInputs = validateRequiredInputs;
+exports.createDeploymentConfig = createDeploymentConfig;
+const core = __importStar(__nccwpck_require__(7484));
+/**
+ * Get and validate action inputs
+ */
+function getActionInputs() {
+    return {
+        dx_host: core.getInput('dx_host', { required: true }),
+        bearer: core.getInput('bearer', { required: true }),
+        service: core.getInput('service', { required: true }),
+        repository: core.getInput('repository'),
+        commit_sha: core.getInput('commit_sha'),
+        deployed_at: core.getInput('deployed_at'),
+    };
+}
+/**
+ * Validate required inputs and throw an error if any are missing
+ */
+function validateRequiredInputs(inputs) {
+    if (!inputs.dx_host) {
+        throw new Error('dx_host input is required');
+    }
+    if (!inputs.bearer) {
+        throw new Error('bearer input is required');
+    }
+    if (!inputs.service) {
+        throw new Error('service input is required');
+    }
+}
+/**
+ * Process inputs and create deployment configuration
+ */
+function createDeploymentConfig(inputs) {
+    validateRequiredInputs(inputs);
+    const repository = inputs.repository || process.env.GITHUB_REPOSITORY;
+    const commitSha = inputs.commit_sha || process.env.GITHUB_SHA;
+    if (!repository) {
+        throw new Error('repository must be provided via input or GITHUB_REPOSITORY environment variable');
+    }
+    if (!commitSha) {
+        throw new Error('commit_sha must be provided via input or GITHUB_SHA environment variable');
+    }
+    const deployedAt = inputs.deployed_at
+        ? parseInt(inputs.deployed_at, 10)
+        : Math.floor(Date.now() / 1000);
+    // Ensure dx_host has the correct format
+    const dxHost = inputs.dx_host.startsWith('http')
+        ? inputs.dx_host
+        : `https://${inputs.dx_host}`;
+    return {
+        dxHost,
+        bearer: inputs.bearer,
+        service: inputs.service,
+        repository,
+        commitSha,
+        deployedAt,
+    };
+}
+//# sourceMappingURL=inputs.js.map
+
+/***/ }),
+
+/***/ 2433:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//# sourceMappingURL=types.js.map
+
+/***/ }),
+
 /***/ 4914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -27554,127 +27937,13 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-const core = __nccwpck_require__(7484);
-const https = __nccwpck_require__(5692);
-const { URL: src_URL } = __nccwpck_require__(7016);
-
-/**
- * Main function to execute the DX deployment creation
- */
-async function run() {
-  try {
-    // Get inputs
-    const dxHost = core.getInput('dx_host', { required: true });
-    const bearer = core.getInput('bearer', { required: true });
-    const service = core.getInput('service', { required: true });
-    const repository = core.getInput('repository') || process.env.GITHUB_REPOSITORY;
-    const commitSha = core.getInput('commit_sha') || process.env.GITHUB_SHA;
-    const deployedAtInput = core.getInput('deployed_at');
-
-    // Validate required inputs
-    if (!dxHost) {
-      throw new Error('dx_host input is required');
-    }
-    if (!bearer) {
-      throw new Error('bearer input is required');
-    }
-    if (!service) {
-      throw new Error('service input is required');
-    }
-
-    // Prepare deployed_at timestamp
-    const deployedAt = deployedAtInput ? parseInt(deployedAtInput, 10) : Math.floor(Date.now() / 1000);
-
-    // Ensure dx_host has the correct format
-    const apiUrl = dxHost.startsWith('http') ? dxHost : `https://${dxHost}`;
-    const fullUrl = `${apiUrl}/api/deployments.create`;
-
-    // Prepare the payload
-    const payload = {
-      repository: repository,
-      service: service,
-      commit_sha: commitSha,
-      deployed_at: deployedAt
-    };
-
-    core.info(`Creating deployment for service: ${service}`);
-    core.info(`Repository: ${repository}`);
-    core.info(`Commit SHA: ${commitSha}`);
-    core.info(`Deployed at: ${deployedAt}`);
-
-    // Make the API call
-    const response = await makeApiCall(fullUrl, bearer, payload);
-
-    core.info('Deployment created successfully');
-    core.setOutput('response', JSON.stringify(response));
-    core.setOutput('deployment_id', response.id || 'unknown');
-
-  } catch (error) {
-    core.setFailed(`Action failed: ${error.message}`);
-  }
-}
-
-/**
- * Make HTTPS API call to DX platform
- * @param {string} url - The API endpoint URL
- * @param {string} bearer - Bearer token for authentication
- * @param {object} payload - JSON payload to send
- * @returns {Promise<object>} - Response from the API
- */
-function makeApiCall(url, bearer, payload) {
-  return new Promise((resolve, reject) => {
-    const parsedUrl = new src_URL(url);
-    const postData = JSON.stringify(payload);
-
-    const options = {
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port || 443,
-      path: parsedUrl.pathname,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${bearer}`,
-        'Content-Length': Buffer.byteLength(postData),
-        'User-Agent': 'gha-dx-create-deployment/1.0.0'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        try {
-          const response = JSON.parse(data);
-          
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(response);
-          } else {
-            reject(new Error(`API request failed with status ${res.statusCode}: ${data}`));
-          }
-        } catch (parseError) {
-          reject(new Error(`Failed to parse API response: ${parseError.message}. Response: ${data}`));
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      reject(new Error(`Request failed: ${error.message}`));
-    });
-
-    // Write the payload
-    req.write(postData);
-    req.end();
-  });
-}
-
-// Run the action
-run();
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(1188);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

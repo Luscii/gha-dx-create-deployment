@@ -13,6 +13,9 @@ yarn-error.log*
 # Don't ignore the dist directory as it's needed for GitHub Actions
 # dist/
 
+# TypeScript build output
+lib/
+
 # Test coverage
 coverage/
 .nyc_output/
