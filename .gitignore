@@ -23,4 +23,4 @@ coverage/
 # Environment files
 .env
 .env.local
-.env.test
+# .env.test is needed for testing and should be committed
