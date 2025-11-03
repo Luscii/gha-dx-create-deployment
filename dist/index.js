@@ -269,10 +269,17 @@ class DeploymentService {
      */
     setActionOutputs(response) {
         core.setOutput('response', JSON.stringify(response));
-        // Extract deployment ID from response data
-        const responseData = response;
-        const data = responseData.data;
-        const deploymentId = data?.id || responseData.id || 'unknown';
+        // Extract deployment ID from response data in a type-safe and clear way
+        let deploymentId = 'unknown';
+        if (response && typeof response === 'object') {
+            // If response has a 'data' property and 'id' inside it
+            if ('data' in response && response.data && typeof response.data === 'object' && 'id' in response.data) {
+                deploymentId = String(response.data.id ?? 'unknown');
+            }
+            else if ('id' in response) {
+                deploymentId = String(response.id ?? 'unknown');
+            }
+        }
         core.setOutput('deployment_id', deploymentId);
     }
 }
