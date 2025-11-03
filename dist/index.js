@@ -198,66 +198,67 @@ const api_client_1 = __nccwpck_require__(1826);
  */
 class DeploymentService {
     constructor(config) {
+        this.config = config;
         this.apiClient = new api_client_1.DxApiClient(config.dxHost, config.bearer);
     }
     /**
      * Create a deployment with the given configuration
      */
-    async createDeployment(config) {
+    async createDeployment() {
         // Log deployment information
-        core.info(`Creating deployment for service: ${config.service}`);
-        if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
-            core.info(`Merge commit SHAs: ${config.mergeCommitShas.join(', ')}`);
+        core.info(`Creating deployment for service: ${this.config.service}`);
+        if (this.config.mergeCommitShas && this.config.mergeCommitShas.length > 0) {
+            core.info(`Merge commit SHAs: ${this.config.mergeCommitShas.join(', ')}`);
         }
-        else if (config.repository && config.commitSha) {
-            core.info(`Repository: ${config.repository}`);
-            core.info(`Commit SHA: ${config.commitSha}`);
+        else if (this.config.repository && this.config.commitSha) {
+            core.info(`Repository: ${this.config.repository}`);
+            core.info(`Commit SHA: ${this.config.commitSha}`);
         }
-        core.info(`Deployed at: ${config.deployedAt}`);
-        core.info(`Environment: ${config.environment || 'production (default)'}`);
-        core.info(`DX Instance: ${config.dxHost}`);
+        core.info(`Deployed at: ${this.config.deployedAt}`);
+        core.info(`Environment: ${this.config.environment || 'production (default)'}`);
+        core.info(`DX Instance: ${this.config.dxHost}`);
         // Log optional parameters
-        if (config.referenceId)
-            core.info(`Reference ID: ${config.referenceId}`);
-        if (config.sourceUrl)
-            core.info(`Source URL: ${config.sourceUrl}`);
-        if (config.sourceName)
-            core.info(`Source Name: ${config.sourceName}`);
-        if (config.integrationBranch)
-            core.info(`Integration Branch: ${config.integrationBranch}`);
-        if (config.success !== undefined)
-            core.info(`Success: ${config.success}`);
-        if (config.metadata)
-            core.info(`Metadata: ${JSON.stringify(config.metadata)}`);
+        if (this.config.referenceId)
+            core.info(`Reference ID: ${this.config.referenceId}`);
+        if (this.config.sourceUrl)
+            core.info(`Source URL: ${this.config.sourceUrl}`);
+        if (this.config.sourceName)
+            core.info(`Source Name: ${this.config.sourceName}`);
+        if (this.config.integrationBranch)
+            core.info(`Integration Branch: ${this.config.integrationBranch}`);
+        if (this.config.success !== undefined)
+            core.info(`Success: ${this.config.success}`);
+        if (this.config.metadata)
+            core.info(`Metadata: ${JSON.stringify(this.config.metadata)}`);
         // Prepare the payload - only include defined values
         const payload = {
-            service: config.service,
-            deployed_at: config.deployedAt,
+            service: this.config.service,
+            deployed_at: this.config.deployedAt,
         };
         // Add attribution mode fields
-        if (config.mergeCommitShas && config.mergeCommitShas.length > 0) {
-            payload.merge_commit_shas = config.mergeCommitShas;
+        if (this.config.mergeCommitShas && this.config.mergeCommitShas.length > 0) {
+            payload.merge_commit_shas = this.config.mergeCommitShas;
         }
-        else if (config.repository && config.commitSha) {
+        else if (this.config.repository && this.config.commitSha) {
             // Only add repository and commit_sha if they're not empty (merge commit mode sets them to empty strings)
-            payload.repository = config.repository;
-            payload.commit_sha = config.commitSha;
+            payload.repository = this.config.repository;
+            payload.commit_sha = this.config.commitSha;
         }
         // Add optional fields if provided
-        if (config.referenceId)
-            payload.reference_id = config.referenceId;
-        if (config.sourceUrl)
-            payload.source_url = config.sourceUrl;
-        if (config.sourceName)
-            payload.source_name = config.sourceName;
-        if (config.metadata)
-            payload.metadata = config.metadata;
-        if (config.integrationBranch)
-            payload.integration_branch = config.integrationBranch;
-        if (config.success !== undefined)
-            payload.success = config.success;
-        if (config.environment)
-            payload.environment = config.environment;
+        if (this.config.referenceId)
+            payload.reference_id = this.config.referenceId;
+        if (this.config.sourceUrl)
+            payload.source_url = this.config.sourceUrl;
+        if (this.config.sourceName)
+            payload.source_name = this.config.sourceName;
+        if (this.config.metadata)
+            payload.metadata = this.config.metadata;
+        if (this.config.integrationBranch)
+            payload.integration_branch = this.config.integrationBranch;
+        if (this.config.success !== undefined)
+            payload.success = this.config.success;
+        if (this.config.environment)
+            payload.environment = this.config.environment;
         // Make the API call
         const response = await this.apiClient.createDeployment(payload);
         core.info('Deployment created successfully');
@@ -268,88 +269,15 @@ class DeploymentService {
      */
     setActionOutputs(response) {
         core.setOutput('response', JSON.stringify(response));
-        core.setOutput('deployment_id', response.id || 'unknown');
+        // Extract deployment ID from response data
+        const responseData = response;
+        const data = responseData.data;
+        const deploymentId = data?.id || responseData.id || 'unknown';
+        core.setOutput('deployment_id', deploymentId);
     }
 }
 exports.DeploymentService = DeploymentService;
 //# sourceMappingURL=deployment-service.js.map
-
-/***/ }),
-
-/***/ 1188:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = run;
-const core = __importStar(__nccwpck_require__(7484));
-const inputs_1 = __nccwpck_require__(6107);
-const deployment_service_1 = __nccwpck_require__(6603);
-/**
- * Main function to execute the DX deployment creation
- */
-async function run() {
-    try {
-        // Get and validate inputs
-        const inputs = (0, inputs_1.getActionInputs)();
-        const config = (0, inputs_1.createDeploymentConfig)(inputs);
-        // Create deployment service and execute deployment
-        const deploymentService = new deployment_service_1.DeploymentService(config);
-        const response = await deploymentService.createDeployment(config);
-        // Set GitHub Actions outputs
-        deploymentService.setActionOutputs(response);
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        core.setFailed(`Action failed: ${errorMessage}`);
-    }
-}
-// Run the action
-if (require.main === require.cache[eval('__filename')]) {
-    run();
-}
-__exportStar(__nccwpck_require__(2433), exports);
-__exportStar(__nccwpck_require__(6107), exports);
-__exportStar(__nccwpck_require__(1826), exports);
-__exportStar(__nccwpck_require__(6603), exports);
-//# sourceMappingURL=index.js.map
 
 /***/ }),
 
@@ -557,6 +485,81 @@ function createDeploymentConfig(inputs) {
     return config;
 }
 //# sourceMappingURL=inputs.js.map
+
+/***/ }),
+
+/***/ 5915:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
+const core = __importStar(__nccwpck_require__(7484));
+const inputs_1 = __nccwpck_require__(6107);
+const deployment_service_1 = __nccwpck_require__(6603);
+/**
+ * Main function to execute the DX deployment creation
+ * @returns {Promise<void>} Resolves when the action is complete
+ */
+async function run() {
+    try {
+        // Get and validate inputs
+        const inputs = (0, inputs_1.getActionInputs)();
+        const config = (0, inputs_1.createDeploymentConfig)(inputs);
+        // Create deployment service and execute deployment
+        const deploymentService = new deployment_service_1.DeploymentService(config);
+        const response = await deploymentService.createDeployment();
+        // Set GitHub Actions outputs
+        deploymentService.setActionOutputs(response);
+    }
+    catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        core.setFailed(`Action failed: ${errorMessage}`);
+    }
+}
+// Export other utilities that might be needed for testing
+__exportStar(__nccwpck_require__(2433), exports);
+__exportStar(__nccwpck_require__(6107), exports);
+__exportStar(__nccwpck_require__(1826), exports);
+__exportStar(__nccwpck_require__(6603), exports);
+//# sourceMappingURL=main.js.map
 
 /***/ }),
 
@@ -28136,13 +28139,29 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(1188);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+/**
+ * This file is the entrypoint for the action
+ */
+const main_1 = __nccwpck_require__(5915);
+// Call the actual logic of the action when this file is run directly
+if (require.main === require.cache[eval('__filename')]) {
+    (0, main_1.run)();
+}
+// Re-export for testing
+var main_2 = __nccwpck_require__(5915);
+Object.defineProperty(exports, "run", ({ enumerable: true, get: function () { return main_2.run; } }));
+//# sourceMappingURL=index.js.map
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
