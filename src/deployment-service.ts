@@ -77,11 +77,16 @@ export class DeploymentService {
   setActionOutputs(response: DxSuccessResponse): void {
     core.setOutput('response', JSON.stringify(response));
     
-    // Extract deployment ID from response data
-    const responseData = (response as Record<string, unknown>);
-    const data = responseData.data as Record<string, unknown> | undefined;
-    const deploymentId = data?.id as string || responseData.id as string || 'unknown';
-    
+    // Extract deployment ID from response data in a type-safe and clear way
+    let deploymentId: string = 'unknown';
+    if (response && typeof response === 'object') {
+      // If response has a 'data' property and 'id' inside it
+      if ('data' in response && response.data && typeof response.data === 'object' && 'id' in response.data) {
+        deploymentId = String((response.data as { id?: unknown }).id ?? 'unknown');
+      } else if ('id' in response) {
+        deploymentId = String((response as { id?: unknown }).id ?? 'unknown');
+      }
+    }
     core.setOutput('deployment_id', deploymentId);
   }
 }
