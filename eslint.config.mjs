@@ -21,8 +21,7 @@ export default defineConfig([
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.test.json'],
-        tsconfigRootDir: '/Users/boite/Dropbox/workspace/boite/projecten/luscii/github-actions/dx-create-deployment'
+        project: ['./tsconfig.json', './tsconfig.test.json']
       }
     }
   }
