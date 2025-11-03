@@ -1,0 +1,60 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+  release:
+    runs-on: ubuntu-latest
+    needs: [validate]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get current release
+        id: current
+        run: |
+          echo "version=$(npm pkg get version | xargs)" >> $GITHUB_OUTPUT
+      - name: Check if release exists
+        uses: boite-nl/query-release-action@v1.0.2
+        id: check
+        with:
+          exclude-draft: true
+          prerelease: ${{ contains(steps.current.outputs.version, '-rc')}}
+          release: ${{ !contains(steps.current.outputs.version, '-rc')}}
+          select: ${{ steps.current.outputs.version }}
+      - name: Create Release
+        id: release
+        uses: release-drafter/release-drafter@v6
+        with:
+          publish: ${{ steps.check.outputs.found == 'false' }}
+          prerelease: ${{ contains(steps.current.outputs.version, '-rc') }}
+          version: ${{ (steps.check.outputs.found == 'false' && steps.current.outputs.version) || ''}}
+          tag: v${{ steps.current.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate tags
+        id: tags
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const version = "${{ steps.release.outputs.tag_name }}"
+            const major = version.split('.')[0]
+            const minor = version.split('.')[1]
+
+            core.setOutput('major', major)
+            core.setOutput('minor', [major, minor].join('.'))
+      - name: Set Major release tag
+        uses: rickstaa/action-create-tag@v1.6.1
+        id: major
+        with:
+          tag: ${{ steps.tags.outputs.major }}
+          force_push_tag: true
+      - name: Set Minor release tag
+        uses: rickstaa/action-create-tag@v1.6.1
+        id: minor
+        with:
+          tag: ${{ steps.tags.outputs.minor }}
+          force_push_tag: true

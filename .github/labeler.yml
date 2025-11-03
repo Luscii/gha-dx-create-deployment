@@ -1,0 +1,22 @@
+version: 1
+labels:
+  # VERSION LABELS
+  - label: major
+    branch: "^major/.+"
+  - label: minor
+    branch: "^minor/.+"
+  - label: patch
+    branch: "^chore/.+"
+  - label: patch
+    branch: "^bug/.+"
+  - label: patch
+    branch: "^enhancement/.+"
+
+  # TYPE LABELS
+  - label: documentation
+    files:
+      - "*.md"
+      - "docs/*"
+  - label: "build definition"
+    files:
+      - ".github/*"
