@@ -4,6 +4,9 @@ on:
     tags:
       - '*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     uses: ./.github/workflows/validate.yml
