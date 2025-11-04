@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write  # Indien nodig voor PR labels
+  pull-requests: write  # If needed for PR labels
 
 jobs:
   administration:
