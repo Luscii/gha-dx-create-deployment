@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate tags
         id: tags
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const version = "${{ steps.release.outputs.tag_name }}"
