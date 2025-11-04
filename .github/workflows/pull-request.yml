@@ -6,8 +6,6 @@ on:
       - reopened
       - synchronize
 
-
-
 jobs:
   administration:
     runs-on: ubuntu-latest
