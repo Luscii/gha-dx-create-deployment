@@ -1,0 +1,37 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+category-template: "## $TITLE"
+change-template: |
+  ### $TITLE
+  $BODY
+
+  #$NUMBER by @$AUTHOR
+
+template: |
+  $CHANGES
+
+prerelease: false
+latest: "true"
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  default: patch
+
+categories:
+  - title: "🚀 Feature"
+    labels:
+      - major
+      - minor
+  - title: "📖 Documentation"
+    labels:
+      - documentation
+  - title: "🏗️ Build definition"
+    labels:
+      - "build definition"
+  - title: "🧷 Fix or improvement"
+    labels:
+      - patch
