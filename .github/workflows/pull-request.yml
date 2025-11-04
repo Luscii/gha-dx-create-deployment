@@ -6,6 +6,10 @@ on:
       - reopened
       - synchronize
 
+permissions:
+  contents: read
+  pull-requests: write  # If needed for PR labels
+
 jobs:
   administration:
     runs-on: ubuntu-latest

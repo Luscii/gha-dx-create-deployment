@@ -1,0 +1,91 @@
+name: Initiate Hotfix Release
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  admin:
+    if: startsWith(github.head_ref, 'hotfix/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+      - name: Get Hotfix version
+        id: hotfix
+        uses: Luscii/gha-get-hotfix-version@v1
+      - name: Generate Command Message
+        uses: actions/github-script@v8
+        with:
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('🧯🧯🧯 Hotfix Release 🧯🧯🧯')
+            })
+
+            // 2. Prepare the comment
+            const output = `## 🧯🧯🧯 Hotfix Release 🧯🧯🧯
+
+            This branch is hotfix release: \`${{ steps.hotfix.outputs.version }}\`
+            For base version: \`${{ steps.hotfix.outputs.base }}\`.
+
+            To deploy this hotfix, make sure all the tests pass and the review is approved.
+            Then add a comment to this PR with the following command, before merging to the main branch:
+            \`/release\``
+
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
+      - name: Check if Review comment exists
+        uses: actions/github-script@v8
+        id: review-comment
+        with:
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+
+            const comment = comments.find(comment => {
+              return comment.body.includes('### Hotfix Review')
+            })
+
+            core.setOutput('exists', comment ? 'true' : 'false')
+      - name: Hotfix Review Comment
+        uses: peter-evans/create-or-update-comment@v4
+        if: steps.review-comment.outputs.exists == 'false'
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: .github/hotfix-release-review.md

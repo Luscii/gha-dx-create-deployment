@@ -1,0 +1,77 @@
+name: Create a Hotfix Release
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+  release:
+    name: Release Hotfix
+    needs: [validate]
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'hotfix') && contains(github.event.comment.body, '/release')
+    steps:
+      - name: Indicate start of release
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: '+1'
+      - name: Get PR
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const request = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            }
+            core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
+            try {
+              const result = await github.rest.pulls.get(request)
+              return result.data
+            } catch (err) {
+              core.setFailed(`Request failed with error ${err}`)
+            }
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+          ref: ${{ fromJson(steps.pr.outputs.result).head.sha }}
+      - name: Get Hotfix version
+        id: hotfix
+        uses: Luscii/gha-get-hotfix-version@v1
+      - run: |
+          echo "Hotfix version: ${{ steps.hotfix.outputs.version }}"
+          echo "Hotfix ref: ${{ fromJson(steps.pr.outputs.result).head.ref }}"
+      - name: Create hotfix release
+        uses: comnoco/create-release-action@v2.0.5
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.hotfix.outputs.version }}
+          release_name: ${{ steps.hotfix.outputs.version }}
+          prerelease: true
+          body: |
+            ## 🧯🧯🧯 ${{ steps.hotfix.outputs.version }} 🧯🧯🧯
+
+            ${{ github.event.issue.body }}
+          draft: false
+          commitish: ${{ fromJson(steps.pr.outputs.result).head.sha }}
+      - name: Share release in comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            > 🎉 **Released Hotfix [v${{ steps.hotfix.outputs.version }}](${{ steps.release.outputs.html_url }})**
+          reactions-edit-mode: append
+          reactions: 'hooray'

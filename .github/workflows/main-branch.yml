@@ -1,0 +1,23 @@
+name: Main Branch
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+  administration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Draft Release
+        id: draft-release
+        uses: release-drafter/release-drafter@v6
+        with:
+          disable-autolabeler: true
+          publish: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
