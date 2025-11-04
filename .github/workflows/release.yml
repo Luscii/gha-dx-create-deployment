@@ -47,13 +47,13 @@ jobs:
             core.setOutput('major', major)
             core.setOutput('minor', [major, minor].join('.'))
       - name: Set Major release tag
-        uses: rickstaa/action-create-tag@v1.6.1
+        uses: rickstaa/action-create-tag@v1.7.2
         id: major
         with:
           tag: ${{ steps.tags.outputs.major }}
           force_push_tag: true
       - name: Set Minor release tag
-        uses: rickstaa/action-create-tag@v1.6.1
+        uses: rickstaa/action-create-tag@v1.7.2
         id: minor
         with:
           tag: ${{ steps.tags.outputs.minor }}
