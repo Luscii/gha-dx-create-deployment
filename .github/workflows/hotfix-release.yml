@@ -39,7 +39,7 @@ jobs:
               core.setFailed(`Request failed with error ${err}`)
             }
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-tags: true
           fetch-depth: 0
