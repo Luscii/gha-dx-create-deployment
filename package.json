@@ -24,7 +24,7 @@
   "author": "Luscii",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.10.1"
+    "@actions/core": "^3.0.0"
   },
   "devDependencies": {
     "@eslint/config-array": "^0.21.1",
