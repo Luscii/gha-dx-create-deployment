@@ -15,13 +15,13 @@ jobs:
     needs: [validate]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Get current release
         id: current
         run: |
           echo "version=$(npm pkg get version | xargs)" >> $GITHUB_OUTPUT
       - name: Check if release exists
-        uses: boite-nl/query-release-action@v1.0.2
+        uses: boite-nl/query-release-action@1d3e32c5effab13fec355a2936bffe9568b65b19 # v1.0.2
         id: check
         with:
           exclude-draft: true
@@ -30,7 +30,7 @@ jobs:
           select: ${{ steps.current.outputs.version }}
       - name: Create Release
         id: release
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         with:
           publish: ${{ steps.check.outputs.found == 'false' }}
           prerelease: ${{ contains(steps.current.outputs.version, '-rc') }}
@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate tags
         id: tags
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const version = "${{ steps.release.outputs.tag_name }}"
@@ -50,13 +50,13 @@ jobs:
             core.setOutput('major', major)
             core.setOutput('minor', [major, minor].join('.'))
       - name: Set Major release tag
-        uses: rickstaa/action-create-tag@v1.7.2
+        uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: major
         with:
           tag: ${{ steps.tags.outputs.major }}
           force_push_tag: true
       - name: Set Minor release tag
-        uses: rickstaa/action-create-tag@v1.7.2
+        uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: minor
         with:
           tag: ${{ steps.tags.outputs.minor }}
